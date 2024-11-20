@@ -13,11 +13,14 @@ export const useQuery = <T extends Record<string, any>, R>(
     variables?: T;
   }
 ) => {
-  const { isLoading: loading, ...rest } = ReactUseQuery({
-    queryKey: [...queryKeyMap.get(queryFn), options?.variables ?? {}],
-    queryFn: () =>
-      options?.variables ? queryFn(options.variables) : queryFn(),
-  });
+  const { isLoading: loading, ...rest } = ReactUseQuery(
+    {
+      queryKey: [...queryKeyMap.get(queryFn), options?.variables ?? {}],
+      queryFn: () =>
+        options?.variables ? queryFn(options.variables) : queryFn(),
+    },
+    queryClient
+  );
 
   return { loading, ...rest };
 };
@@ -29,20 +32,23 @@ export const useMutation = <T, R>(
     onError?: (error: Error) => void;
   }
 ): [({ variables }: { variables: T }) => Promise<R>, { loading: boolean }] => {
-  const { mutateAsync, isPending: loading } = ReactUseMutation({
-    mutationKey: [...queryKeyMap.get(mutationFn)],
-    mutationFn,
-    onSuccess: (data) => {
-      if (queryKeyMap.get(mutationFn)) {
-        queryClient.refetchQueries({
-          queryKey: queryKeyMap.get(mutationFn),
-          exact: false,
-        });
-        options?.onSuccess?.(data);
-      }
+  const { mutateAsync, isPending: loading } = ReactUseMutation(
+    {
+      mutationKey: [...queryKeyMap.get(mutationFn)],
+      mutationFn,
+      onSuccess: (data) => {
+        if (queryKeyMap.get(mutationFn)) {
+          queryClient.refetchQueries({
+            queryKey: queryKeyMap.get(mutationFn),
+            exact: false,
+          });
+          options?.onSuccess?.(data);
+        }
+      },
+      onError: options?.onError,
     },
-    onError: options?.onError,
-  });
+    queryClient
+  );
 
   return [
     ({ variables }: { variables: T }) => {
