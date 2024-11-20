@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist", // 컴파일된 파일 출력 폴더
+    "module": "CommonJS",
+    "target": "ES6",
+    "declaration": true, // 타입 선언 파일 생성
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src"], // 포함할 파일 경로
+  "exclude": ["node_modules", "dist"] // 제외할 경로
+}
